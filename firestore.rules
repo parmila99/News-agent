@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'rahulrajbanshi981052@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isReporterOrAdmin() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['reporter', 'editor', 'admin'])
+      );
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Articles Collection
+    match /articles/{articleId} {
+      allow read: if resource.data.status == 'published' || isReporterOrAdmin();
+      allow create: if isReporterOrAdmin() || isAdmin();
+      allow update: if isAdmin() || (isReporterOrAdmin() && (resource.data.authorId == request.auth.uid || request.resource.data.views != resource.data.views || request.resource.data.likes != resource.data.likes)) || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes']));
+      allow delete: if isAdmin();
+
+      // Nested Comments
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isOwner(resource.data.userId) || isAdmin();
+      }
+    }
+
+    // Live Stream Chat
+    match /liveChat/{messageId} {
+      allow read: if true;
+      allow create: if true; // Public chat stream with client timestamp
+      allow update, delete: if isAdmin();
+    }
+
+    // Polls
+    match /polls/{pollId} {
+      allow read: if true;
+      allow create: if isAdmin() || isReporterOrAdmin();
+      allow update: if true; // Allows voting
+      allow delete: if isAdmin();
+    }
+  }
+}

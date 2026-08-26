@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "users": {
+      "title": "User",
+      "description": "Registered users and staff profiles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "reporter", "admin", "editor"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "articles": {
+      "title": "News Article",
+      "description": "News articles published on RGNN",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleTranslations": { "type": "object" },
+        "content": { "type": "string" },
+        "summary": { "type": "string" },
+        "category": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorRole": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "isBreaking": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "isLiveReport": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["draft", "pending", "published"] },
+        "views": { "type": "number" },
+        "likes": { "type": "number" },
+        "location": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "category", "authorId", "status"]
+    },
+    "comments": {
+      "title": "Comment",
+      "description": "User comments on articles",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "articleId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["articleId", "userId", "userName", "content"]
+    },
+    "liveChat": {
+      "title": "Live Chat Message",
+      "description": "Real-time Live TV stream chat message",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userName", "message"]
+    },
+    "polls": {
+      "title": "Opinion Poll",
+      "description": "Public opinion polls and election counters",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "question": { "type": "string" },
+        "options": { "type": "array" },
+        "totalVotes": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["question", "options", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile records"
+    },
+    "/articles/{articleId}": {
+      "schema": "articles",
+      "description": "Global news articles"
+    },
+    "/articles/{articleId}/comments/{commentId}": {
+      "schema": "comments",
+      "description": "Article comments"
+    },
+    "/liveChat/{messageId}": {
+      "schema": "liveChat",
+      "description": "Live broadcast chat stream"
+    },
+    "/polls/{pollId}": {
+      "schema": "polls",
+      "description": "Public opinion polls"
+    }
+  }
+}

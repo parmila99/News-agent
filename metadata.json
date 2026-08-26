@@ -1,0 +1,12 @@
+{
+  "name": "Rajbanshi Global News Network (RGNN)",
+  "description": "A complete modern international online news media company platform with professional branding, multi-language support, real-time news, AI-powered features, and comprehensive admin/reporter dashboards.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
